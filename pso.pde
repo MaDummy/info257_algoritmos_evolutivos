@@ -27,7 +27,8 @@ PImage surf; // imagen que entrega el fitness
 int puntos = 100; // Cantidad de particulas se
 Particle[] fl; // arreglo de partículas
 float d = 15; // radio del círculo, solo para despliegue
-float gbestx, gbesty, gbest; // posición y fitness del mejor global
+float gbest = Float.MAX_VALUE;
+float gbestx, gbesty; // posición y fitness del mejor global
 float w = 1000; // inercia: baja (~50): explotación, alta (~5000): exploración (2000 ok)
 float C1 = 30, C2 =  100; // learning factors (C1: own, C2: social) (ok)
 int evals = 0, evals_to_best = 0; //número de evaluaciones, sólo para despliegue
@@ -130,6 +131,7 @@ class Particle{
 void despliegaBest(){
   fill(#0000ff);
   ellipse(gbestx,gbesty,d,d);
+  //ellipse(cartesianToScreenX(5),cartesianToScreenY(5),d,d);
   }
 
 // ======================================================================
