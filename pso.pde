@@ -1,7 +1,7 @@
 int cols, rows;
 float[][] z;
 float domainMin = -3, domainMax = 7;
-int gridSize = 150;  // Grid subdivisions
+int gridSize = 150;  // Subdivisiones de la grilla
 float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
 
@@ -167,18 +167,19 @@ void setup() {
 
 void draw() {
   background(0);
-  translate(width / 2, height / 2, 0);
-  rotateX(PI);  // Tilt for better visibility
+  translate(width / 2, height / 2, 0); //Centra la imagen
+  rotateX(PI);  // Rota la imagen para que se vea desde arriba
 
-  float cellSize = width / cols;  // Adjust size to fit screen
+  float cellSize = width / cols;  // Ajusta tamaño de los elementos a la pantalla
   
   for (int x = 0; x < cols - 1; x++) {
     for (int y = 0; y < rows - 1; y++) {
+      // Usa map para pasar x e y a sus valores equivalentes en la pantalla
       float px = map(x, 0, cols, -width / 2, width / 2);
       float py = map(y, 0, rows, -height / 2, height / 2);
       
-      float normZ = map(z[x][y], minZ, maxZ, 0, 1);  // Normalize height
-      color c = getHeatColor(normZ);  // Get color based on normalized Z
+      float normZ = map(z[x][y], minZ, maxZ, 0, 1);  // Usa map para pasar Z a valores entre 0 y 1
+      color c = getHeatColor(normZ);  // Obtiene color basandose en z
 
       fill(c);
       noStroke();
@@ -197,13 +198,13 @@ void draw() {
   }
 }
 
-// Function to map values to a heatmap-like gradient
+// Mapea valores a un gradiente como mapa de calor
 color getHeatColor(float t) {
   return lerpColor(lerpColor(color(0, 0, 255), color(0, 255, 0), t), 
                    color(255, 0, 0), t);
 }
 
-// Rastrigin function
+// Funcion Rastrigin 
 float rastrigin(float x, float y) {
   float A = 10;
   return A * 2 + (x * x - A * cos(TWO_PI * x)) + (y * y - A * cos(TWO_PI * y));
