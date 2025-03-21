@@ -30,10 +30,10 @@ float d = 15; // radio del círculo, solo para despliegue
 float gbest = Float.MAX_VALUE;
 float gbestx, gbesty; // posición y fitness del mejor global
 float w = 1000; // inercia: baja (~50): explotación, alta (~5000): exploración (2000 ok)
-float C1 = 30, C2 =  100; // learning factors (C1: own, C2: social) (ok)
+float C1 = 1.5, C2 =  1.5; // learning factors (C1: own, C2: social) (ok)
 int evals = 0, evals_to_best = 0; //número de evaluaciones, sólo para despliegue
 float maxv = 3; // max velocidad (modulo)
-int altura = 300; int ancho = 300;
+int altura = 700; int ancho = 700;
 // OBS:
 // cartesianToScreenX 7 -> 1000
 // cartesianToScreenX -3 -> 0
@@ -56,7 +56,7 @@ class Particle{
     x = constrain(x, -ancho, ancho); y = constrain(y, -altura, altura);
 
     vx = random(-1,1) ; vy = random(-1,1);
-    pfit = Float.POSITIVE_INFINITY; fit = Float.POSITIVE_INFINITY; // Ya que buscamos MINIMIZAR
+    pfit = Float.MAX_VALUE; fit = Float.MAX_VALUE; // Ya que buscamos MINIMIZAR
   }
   
   // ---------------------------- Evalúa partícula
@@ -84,12 +84,12 @@ class Particle{
     //vx = vx + random(0,1)*C1*(px - x) + random(0,1)*C2*(gbestx - x);
     //vy = vy + random(0,1)*C1*(py - y) + random(0,1)*C2*(gbesty - y);
     //actualiza velocidad (fórmula con inercia, p.250)
-    vx = w * vx + random(0,1)*(px - x) + random(0,1)*(gbestx - x);
-    vy = w * vy + random(0,1)*(py - y) + random(0,1)*(gbesty - y);
+    //vx = w * vx + random(0,1)*(px - x) + random(0,1)*(gbestx - x);
+    //vy = w * vy + random(0,1)*(py - y) + random(0,1)*(gbesty - y);
     
     //actualiza velocidad (fórmula mezclada)
-    //vx = w * vx + random(0,1)*C1*(px - x) + random(0,1)*C2*(gbestx - x);
-    //vy = w * vy + random(0,1)*C1*(py - y) + random(0,1)*C2*(gbesty - y);
+    vx = w * vx + random(0,1)*C1*(px - x) + random(0,1)*C2*(gbestx - x);
+    vy = w * vy + random(0,1)*C1*(py - y) + random(0,1)*C2*(gbesty - y);
     // trunca velocidad a maxv
     float modu = sqrt(vx*vx + vy*vy);
     if (modu > maxv){
@@ -108,10 +108,10 @@ class Particle{
     // println("altura", height); 700
     // println("ancho", width); 1000
     // Rebote en los límites de la pantalla
-    if (x > ancho || x < -ancho) { // Rebote en el eje X (coordenadas de pantalla)
+    if (x >= ancho || x < 0) { // Rebote en el eje X (coordenadas de pantalla)
         vx = -vx;  // Rebote en el eje X
     }
-    if (y > altura || y < -altura) { // Rebote en el eje Y (coordenadas de pantalla)
+    if (y >= altura || y < 0) { // Rebote en el eje Y (coordenadas de pantalla)
         vy = -vy;  // Rebote en el eje Y
     }
 
@@ -132,17 +132,19 @@ void despliegaBest() {
   fill(#0000ff);
   
   // Convert Cartesian coordinates (6,6) to screen coordinates
-  float screenX = cartesianToScreenX(0);
-  float screenY = cartesianToScreenY(0);
+  //float screenX = cartesianToScreenX(gbestx);
+  //float screenY = cartesianToScreenY(gbesty);
+  float cartesianX = screenToCartesianX(gbestx);
+  float cartesianY = screenToCartesianY(gbesty);
   
   // Draw the ellipse at the computed screen coordinates
-  ellipse(screenX, screenY, d, d);
+  ellipse(gbestx, gbesty, d, d);
   
   // Display the coordinates as text next to the ellipse
   fill(255);  // White text for visibility
   textSize(16);
   textAlign(LEFT, CENTER); // Align text to the left of its position
-  text("("+ nf(screenX, 0, 2) + ", " + nf(screenY, 0, 2) + ")", screenX + 15, screenY);
+  text("("+ nf(cartesianX, 0, 2) + ", " + nf(cartesianY, 0, 2) + ")", gbestx + 15, gbesty);
 }
 
 
