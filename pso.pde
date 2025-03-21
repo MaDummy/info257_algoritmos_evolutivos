@@ -128,25 +128,38 @@ class Particle{
 } //fin de la definición de la clase Particle  
  
 // dibuja punto azul en la mejor posición y despliega números
-void despliegaBest(){
+void despliegaBest() {
   fill(#0000ff);
-  ellipse(gbestx,gbesty,d,d);
-  //ellipse(cartesianToScreenX(5),cartesianToScreenY(5),d,d);
-  }
+  
+  // Convert Cartesian coordinates (6,6) to screen coordinates
+  float screenX = cartesianToScreenX(0);
+  float screenY = cartesianToScreenY(0);
+  
+  // Draw the ellipse at the computed screen coordinates
+  ellipse(screenX, screenY, d, d);
+  
+  // Display the coordinates as text next to the ellipse
+  fill(255);  // White text for visibility
+  textSize(16);
+  textAlign(LEFT, CENTER); // Align text to the left of its position
+  text("("+ nf(screenX, 0, 2) + ", " + nf(screenY, 0, 2) + ")", screenX + 15, screenY);
+}
+
 
 // ======================================================================
 
 void setup() {
-  size(1000, 700, P3D);  // Use P3D for rendering
+  size(700, 700);  // Use P3D for rendering
   cols = gridSize;
   rows = gridSize;
   z = new float[cols][rows];
+  
 
   // Compute function values
   for (int i = 0; i < cols; i++) {
     for (int j = 0; j < rows; j++) {
       float x = map(i, 0, cols - 1, domainMin, domainMax);
-      float y = map(j, 0, rows - 1, domainMin, domainMax);
+      float y = map(j, rows - 1, 0, domainMin, domainMax);
       z[i][j] = rastrigin(x, y);
     }
   }
@@ -169,16 +182,14 @@ void setup() {
 
 void draw() {
   background(0);
-  translate(width / 2, height / 2, 0); //Centra la imagen
-  rotateX(PI);  // Rota la imagen para que se vea desde arriba
 
   float cellSize = width / cols;  // Ajusta tamaño de los elementos a la pantalla
   
   for (int x = 0; x < cols - 1; x++) {
     for (int y = 0; y < rows - 1; y++) {
       // Usa map para pasar x e y a sus valores equivalentes en la pantalla
-      float px = map(x, 0, cols, -width / 2, width / 2);
-      float py = map(y, 0, rows, -height / 2, height / 2);
+      float px = map(x, 0, cols, 0, width);
+      float py = map(y, 0, rows, 0, height);
       
       float normZ = map(z[x][y], minZ, maxZ, 0, 1);  // Usa map para pasar Z a valores entre 0 y 1
       color c = getHeatColor(normZ);  // Obtiene color basandose en z
