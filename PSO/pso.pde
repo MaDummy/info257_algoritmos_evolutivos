@@ -23,7 +23,6 @@ float cartesianToScreenY(float y) {
 }
 
 // ========================= PARTICULA ====================================
-PImage surf; // imagen que entrega el fitness
 int puntos = 100; // Cantidad de particulas se
 Particle[] fl; // arreglo de partículas
 float d = 15; // radio del círculo, solo para despliegue
