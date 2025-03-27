@@ -37,6 +37,17 @@ float cartesianToScreenY(float y) {
   return map(y, -3, 7, height, 0);
 }
 
+String floatToBinary(float num) {
+  int bits = Float.floatToIntBits(num);
+  return String.format("%32s", Integer.toBinaryString(bits)).replace(" ", "0");
+}
+
+float binaryToFloat(String binario) {
+  int bits = (int) Long.parseLong(binario, 2);
+  return Float.intBitsToFloat(bits);
+}
+
+
 // ======================= FUNCION DE TORNEO ============================
 
 // Funcion para seleccionar a los k individuos aleatorios
@@ -91,6 +102,29 @@ void verSeleccionado(Individuo[] particulas){
 
 }
 
+//=========================== CRUZAMIENTO =================================
+
+
+//Aqui va la mutacion ALVARO uwu
+float genetic(float a, float b){
+  return a;
+}
+
+Individuo cruzar(Individuo juan, Individuo maria){
+  
+  float x1 = juan.getCartX();
+  float x2 = maria.getCartX();
+  
+  float y1 = juan.getCartY();
+  float y2 = maria.getCartY();
+  
+  float x_new = genetic(x1,x2);
+  float y_new = genetic(y1,y2);
+  
+  Individuo rafael = new Individuo(x_new,y_new);
+  return rafael;
+}
+
 // ========================= PARTICULA ====================================
 
 class Individuo{
@@ -122,6 +156,27 @@ class Individuo{
     // Hacemos que se mantengan dentro de la ventana
     x = constrain(x, -ancho, ancho); y = constrain(y, -altura, altura);
   }
+  Individuo(float x, float y){
+    // Le asignamos un color por defecto
+    c = color(#b2db48); 
+    
+    // Obtenemos su valor en la funcion rastrigin
+    fit = rastrigin(x, y);
+    
+    // Verificamos si al nacer la particula es el mejor fit
+    if (fit < gbest){
+      gbest = fit;
+      gbestx = x;
+      gbesty = y;
+    }
+    
+    // Lo transformamos para que sea visible (coherentemente) en pantalla
+    this.x = cartesianToScreenX(x); 
+    this.y = cartesianToScreenX(y);
+    
+    // Hacemos que se mantengan dentro de la ventana
+    this.x = constrain(this.x, -ancho, ancho); this.y = constrain(this.y, -altura, altura);
+  }
   
   
   // ------------------------------ despliega individuo
@@ -138,6 +193,14 @@ class Individuo{
   float getFit() {
     return fit;
   }
+  
+  float getCartX(){
+    return screenToCartesianX(this.x);
+  }
+  float getCartY(){
+    return screenToCartesianY(this.y);
+  }
+  
 } // Fin de la definición de la clase Individuo
 
 
