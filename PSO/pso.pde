@@ -29,7 +29,7 @@ float d = 15; // radio del círculo, solo para despliegue
 float gbest = Float.MAX_VALUE;
 float gbestx, gbesty; // posición y fitness del mejor global
 float w = 1000; // inercia: baja (~50): explotación, alta (~5000): exploración (2000 ok)
-float C1 = 1.5, C2 =  1.5; // learning factors (C1: own, C2: social) (ok)
+float C1 = 1.5, C2 =  3; // learning factors (C1: own, C2: social) (ok)
 int evals = 0, evals_to_best = 0; //número de evaluaciones, sólo para despliegue
 float maxv = 3; // max velocidad (modulo)
 int altura = 700; int ancho = 700;

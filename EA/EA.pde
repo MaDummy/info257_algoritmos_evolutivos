@@ -105,10 +105,11 @@ void verSeleccionado(Individuo[] particulas){
 //=========================== CRUZAMIENTO =================================
 
 
-//Aqui va la mutacion ALVARO uwu
-float genetic(float a, float b){
-  return a;
-}
+//Cruzamiento
+//float genetic(float a, float b) {
+  
+//}
+
 
 Individuo cruzar(Individuo juan, Individuo maria){
   
@@ -118,8 +119,11 @@ Individuo cruzar(Individuo juan, Individuo maria){
   float y1 = juan.getCartY();
   float y2 = maria.getCartY();
   
-  float x_new = genetic(x1,x2);
-  float y_new = genetic(y1,y2);
+  float y_new = random(min(y1, y2), max(y1, y2));
+  float x_new = random(min(x1, x2), max(x1, x2));
+  
+  //float x_new = genetic(x1,x2);
+  //float y_new = genetic(y1,y2);
   
   Individuo rafael = new Individuo(x_new,y_new);
   return rafael;
@@ -273,7 +277,9 @@ void draw() {
   despliegaBest();
   
   // ~~~~~~~~~~~~~~ SELECCION DE PADRES ~~~~~~~~~~~~~~~~
-  verSeleccionado(fl);
+  for (int i = 0; i < cantTorneos; i++){
+    verSeleccionado(fl);
+  }
   
   delay(1000);
 }
