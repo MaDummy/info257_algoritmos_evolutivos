@@ -10,11 +10,15 @@ float maxZ = -Float.MAX_VALUE;
 // Variables usadas para particulas
 int puntos = 100; // Cantidad de particulas 
 Individuo[] fl; // arreglo de partículas
+
 float d = 15; // radio del círculo, solo para despliegue
 float gbest = Float.MAX_VALUE; // Fitness del mejor global
 float gbestx, gbesty; // posición del mejor global, en cartesiano
 int evals = 0, evals_to_best = 0; //número de evaluaciones, sólo para despliegue
 
+// Variables usadas para la seleccion de individuos
+int k = 10; // Cantidad de individuos que participaran en el torneo
+int cantTorneos = 5; // Cantidad de torneos a realizar
 
 // ======================= FUNCIONES DE CONVERSIÓN ============================
  
@@ -33,14 +37,70 @@ float cartesianToScreenY(float y) {
   return map(y, -3, 7, height, 0);
 }
 
+// ======================= FUNCION DE TORNEO ============================
+
+// Funcion para seleccionar a los k individuos aleatorios
+void selectIndividuo(IntList seleccionados) {
+  int n = fl.length; 
+  IntList index = new IntList(); // Hacemos una lista con los indices
+  for (int i = 0; i < n; i++){
+    index.append(i);
+  }
+  index.shuffle(); // "Desordena" aleatoriamente la lista de indices
+  
+  // Tomamos los primeros k indices aleatorios 
+  for (int i = 0; i < k; i++){
+    seleccionados.append(index.get(i));
+  }
+}
+
+// Selecciona un individuo con algoritmo de torneo, asumiendo que se elegiran k individuos para comparar, retorna el indice del ganador
+int tournamentSelection(Individuo[] particulas) {
+  IntList seleccionados = new IntList();
+  selectIndividuo(seleccionados); //
+  
+  while(seleccionados.size() != 1 ){
+    IntList continuan = new IntList();
+    
+    // Verificamos si la lista tiene un número impar de elementos, si no lo tiene entonces, eliminamos el primer perdedor
+    if (seleccionados.size() % 2 != 0) {
+      // Obtenemos el fitness de dos individuos
+      float a = particulas[seleccionados.get(0)].getFit();
+      float b = particulas[seleccionados.get(1)].getFit();
+      // Comparamos, el menor pasa para poder seguir compitiendo
+      if (a < b) seleccionados.remove(1); else seleccionados.remove(0);
+    }
+    
+    // Comparar en pares y seleccionar el menor
+    for (int i = 0; i < seleccionados.size(); i += 2) {
+      // Obtenemos el fitness de dos individuos
+      float a = particulas[seleccionados.get(i)].getFit();
+      float b = particulas[seleccionados.get(i + 1)].getFit();
+      // Comparamos, el menor pasa
+      if (a < b) continuan.append(i); else continuan.append(i+1);
+    }
+    
+    seleccionados = continuan;  // La nueva lista reemplaza a la anterior
+  }
+  return seleccionados.get(0); // Retornamos el indice del ganador
+}
+
+void verSeleccionado(Individuo[] particulas){
+  int seleccionado = tournamentSelection(particulas);
+  particulas[seleccionado].setColor(#db48bb);
+
+}
 
 // ========================= PARTICULA ====================================
 
 class Individuo{
   float x, y, fit; // current position(x-vector)  and fitness (x-fitness)
-  
+  color c; // Color del individuo
   // ---------------------------- Constructor
   Individuo(){
+    // Le asignamos un color por defecto
+    c = color(#b2db48); 
+    
     // Escogemos un valor aleatorio dentro del dominio ]-3,7[, le restamos algo minimo a -3 ya que random(A,B) incluye a A y excluye a B
     float cartX = random(domainMin + 0.01 , domainMax); 
     float cartY = random(domainMin + 0.01, domainMax);
@@ -68,9 +128,17 @@ class Individuo{
   void display(){
     ellipse (x,y,d,d);
     // dibuja vector
+    fill(c);
     stroke(#ffffff); // Color del borde de la partícula
   }
-} //fin de la definición de la clase Individuo
+  // ------------------------------ Función para cambiar color manualmente
+  void setColor(color nuevoColor) {
+    c = nuevoColor;
+  }
+  float getFit() {
+    return fit;
+  }
+} // Fin de la definición de la clase Individuo
 
 
 // =============================== SETUP VENTANA ===============================
@@ -105,6 +173,8 @@ void setup() {
   fl = new Individuo[puntos];
   for(int i =0;i<puntos;i++)
     fl[i] = new Individuo();
+
+
 }
 
 
@@ -129,6 +199,7 @@ void draw() {
       noStroke();
       rect(px, py, cellSize, cellSize);
     }
+    
   }
   
   // ~~~~~~~~~~~~~~ PARTICULAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,6 +208,11 @@ void draw() {
   }
   
   despliegaBest();
+  
+  // ~~~~~~~~~~~~~~ SELECCION DE PADRES ~~~~~~~~~~~~~~~~
+  verSeleccionado(fl);
+  
+  delay(1000);
 }
 
 // Mapea valores a un gradiente como mapa de calor
