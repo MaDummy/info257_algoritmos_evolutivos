@@ -7,6 +7,8 @@ int gridSize = 150; // Subdivisiones de la grilla
 float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
 
+float MUTATE_CHANCE = 1000; //1 entre MUTATE_CHANCE
+
 // Variables usadas para particulas
 int puntos = 160; // Cantidad de particulas
 int expectativa_vida = 8;
@@ -94,6 +96,34 @@ void deshacerSeleccion(){
 
 //=========================== CRUZAMIENTO =================================
 
+float mutate(float coord){
+   char[] bits = floatToBinary(coord).toCharArray();
+   String mutated_bits = "";
+   float mutated;
+   int chance;
+   char aux='0';
+   for(char i:bits){
+     chance = int(random(0,MUTATE_CHANCE));
+     if(chance == 1){
+       if(i=='1'){
+         aux = '0';
+       }
+       else{
+         aux = '1';
+       }
+       mutated_bits+=aux;
+     }
+     else{
+       mutated_bits+=i;
+     }
+   }
+   float temp = binaryToFloat(mutated_bits);
+   int temp_int = constrain((int) temp,-2,6);
+   mutated = temp_int+(temp-(int)temp);
+   mutated = (float)((int)(mutated*10000000))/10000000.0f;
+   return mutated;
+}
+
 void cruzar(Individuo juan, Individuo maria){
   float x1 = juan.getCartX();
   float x2 = maria.getCartX();
@@ -101,12 +131,9 @@ void cruzar(Individuo juan, Individuo maria){
   float y1 = juan.getCartY();
   float y2 = maria.getCartY();
   
-  float y_new = random(min(y1, y2), max(y1, y2));
-  float x_new = random(min(x1, x2), max(x1, x2));
-  
-  //float x_new = genetic(x1,x2);
-  //float y_new = genetic(y1,y2);
-  
+  float y_new = mutate(random(min(y1, y2), max(y1, y2)));
+  float x_new = mutate(random(min(x1, x2), max(x1, x2)));
+
   Individuo rafael = new Individuo(x_new, y_new);
   Individuos.add(rafael);
 }
@@ -186,11 +213,11 @@ class Individuo{
     // Lo transformamos para que sea visible (coherentemente) en pantalla
     this.x = cartesianToScreenX(parentX); 
     this.y = cartesianToScreenY(parentY);
-    this.cartX = x;
-    this.cartY = y;
+    this.cartX = parentX;
+    this.cartY = parentY;
     
     // Hacemos que se mantengan dentro de la ventana
-    x = constrain(x, -ancho, ancho); y = constrain(y, -altura, altura);
+    this.x = constrain(this.x, -ancho, ancho); this.y = constrain(this.y, -altura, altura);
   }
   
   
@@ -297,8 +324,7 @@ void draw() {
   
   for(int i = 0;i<Individuos.size();i++){
     Individuos.get(i).display();
-    
-    //Aprovechamos de ver si el individuo cumplio con su expectativa de vida
+
     /*if (Individuos.get(i).ciclos == 8){
       Individuos.remove(i);
     }*/
