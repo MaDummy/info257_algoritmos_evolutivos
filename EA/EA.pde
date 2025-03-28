@@ -8,8 +8,11 @@ float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
 
 // Variables usadas para particulas
-int puntos = 100; // Cantidad de particulas 
+int puntos = 160; // Cantidad de particulas
+int expectativa_vida = 8;
 Individuo[] fl; // arreglo de partículas
+ArrayList<Individuo> Individuos;
+ArrayList<Individuo> Seleccionados;
 
 float d = 15; // radio del círculo, solo para despliegue
 float gbest = Float.MAX_VALUE; // Fitness del mejor global
@@ -17,8 +20,8 @@ float gbestx, gbesty; // posición del mejor global, en cartesiano
 int evals = 0, evals_to_best = 0; //número de evaluaciones, sólo para despliegue
 
 // Variables usadas para la seleccion de individuos
-int k = 10; // Cantidad de individuos que participaran en el torneo
-int cantTorneos = 5; // Cantidad de torneos a realizar
+int k = 8; // Cantidad de individuos que participaran en el torneo
+int cantTorneos = 20; // Cantidad de torneos a realizar
 
 // ======================= FUNCIONES DE CONVERSIÓN ============================
  
@@ -50,69 +53,48 @@ float binaryToFloat(String binario) {
 
 // ======================= FUNCION DE TORNEO ============================
 
-// Funcion para seleccionar a los k individuos aleatorios
-void selectIndividuo(IntList seleccionados) {
-  int n = fl.length; 
+// Funcion para seleccionar a los k individuos aleatorios y el mejor
+void selectIndividuo() {
+  int n = Individuos.size(); 
   IntList index = new IntList(); // Hacemos una lista con los indices
-  for (int i = 0; i < n; i++){
-    index.append(i);
-  }
-  index.shuffle(); // "Desordena" aleatoriamente la lista de indices
-  
-  // Tomamos los primeros k indices aleatorios 
   for (int i = 0; i < k; i++){
-    seleccionados.append(index.get(i));
+    index.append((int) random(n));
   }
-}
-
-// Selecciona un individuo con algoritmo de torneo, asumiendo que se elegiran k individuos para comparar, retorna el indice del ganador
-int tournamentSelection(Individuo[] particulas) {
-  IntList seleccionados = new IntList();
-  selectIndividuo(seleccionados); //
   
-  while(seleccionados.size() != 1 ){
-    IntList continuan = new IntList();
-    
-    // Verificamos si la lista tiene un número impar de elementos, si no lo tiene entonces, eliminamos el primer perdedor
-    if (seleccionados.size() % 2 != 0) {
-      // Obtenemos el fitness de dos individuos
-      float a = particulas[seleccionados.get(0)].getFit();
-      float b = particulas[seleccionados.get(1)].getFit();
-      // Comparamos, el menor pasa para poder seguir compitiendo
-      if (a < b) seleccionados.remove(1); else seleccionados.remove(0);
+  // Buscamos el mejor fit entre los indices de index
+  int best = index.get(0);
+  float bestValue = Individuos.get(index.get(0)).fit;
+  for (int i = 1; i < k; i++){
+    if (Individuos.get(index.get(i)).fit < bestValue){
+      bestValue = Individuos.get(index.get(i)).fit;
+      best = index.get(i);
     }
-    
-    // Comparar en pares y seleccionar el menor
-    for (int i = 0; i < seleccionados.size(); i += 2) {
-      // Obtenemos el fitness de dos individuos
-      float a = particulas[seleccionados.get(i)].getFit();
-      float b = particulas[seleccionados.get(i + 1)].getFit();
-      // Comparamos, el menor pasa
-      if (a < b) continuan.append(i); else continuan.append(i+1);
-    }
-    
-    seleccionados = continuan;  // La nueva lista reemplaza a la anterior
   }
-  return seleccionados.get(0); // Retornamos el indice del ganador
+  
+  // Añadimos el mejor a seleccionados 
+  Seleccionados.add(Individuos.get(best));
 }
 
-void verSeleccionado(Individuo[] particulas){
-  int seleccionado = tournamentSelection(particulas);
-  particulas[seleccionado].setColor(#db48bb);
 
+void seleccion(){
+  // Selecciona cantTorneos individuos y cambia color de estos
+  for (int i = 0; i < cantTorneos; i++){
+    selectIndividuo();
+    Seleccionados.get(i).setColor(#4d24b7);
+  }
+}
+
+void deshacerSeleccion(){
+  // Selecciona cantTorneos individuos y cambia color de estos
+  for (int i = 0; i < Seleccionados.size(); i++){
+    Seleccionados.get(i).setColor(#b2db48);
+  }
+  Seleccionados.clear();
 }
 
 //=========================== CRUZAMIENTO =================================
 
-
-//Cruzamiento
-//float genetic(float a, float b) {
-  
-//}
-
-
-Individuo cruzar(Individuo juan, Individuo maria){
-  
+void cruzar(Individuo juan, Individuo maria){
   float x1 = juan.getCartX();
   float x2 = maria.getCartX();
   
@@ -125,23 +107,46 @@ Individuo cruzar(Individuo juan, Individuo maria){
   //float x_new = genetic(x1,x2);
   //float y_new = genetic(y1,y2);
   
-  Individuo rafael = new Individuo(x_new,y_new);
-  return rafael;
+  Individuo rafael = new Individuo(x_new, y_new);
+  Individuos.add(rafael);
 }
 
+void cruzamiento(){
+  int iteraciones = Seleccionados.size();
+  if (iteraciones % 2 == 0){
+    for(int i = 0; i < iteraciones / 2; i++){
+      cruzar(Seleccionados.get(i), Seleccionados.get(i+1));
+    }
+  }
+  else{
+    for(int i = 0; i < (iteraciones / 2)-1; i++){
+      cruzar(Seleccionados.get(i), Seleccionados.get(i+1));
+    }
+    cruzar(Seleccionados.get(0), Seleccionados.get(iteraciones));
+  }
+}
 // ========================= PARTICULA ====================================
+// Function to mutate a coordinate by flipping a random bit
+
 
 class Individuo{
   float x, y, fit; // current position(x-vector)  and fitness (x-fitness)
+  float cartX, cartY;
+  int ciclos;
   color c; // Color del individuo
+  
+    
   // ---------------------------- Constructor
   Individuo(){
     // Le asignamos un color por defecto
     c = color(#b2db48); 
     
+    // Ciclos con vida
+    ciclos = 1;
+    
     // Escogemos un valor aleatorio dentro del dominio ]-3,7[, le restamos algo minimo a -3 ya que random(A,B) incluye a A y excluye a B
-    float cartX = random(domainMin + 0.01 , domainMax); 
-    float cartY = random(domainMin + 0.01, domainMax);
+    cartX = random(domainMin + 0.01 , domainMax); 
+    cartY = random(domainMin + 0.01, domainMax);
     
     // Obtenemos su valor en la funcion rastrigin
     fit = rastrigin(cartX, cartY);
@@ -160,26 +165,32 @@ class Individuo{
     // Hacemos que se mantengan dentro de la ventana
     x = constrain(x, -ancho, ancho); y = constrain(y, -altura, altura);
   }
-  Individuo(float x, float y){
+  Individuo(float parentX, float parentY){
     // Le asignamos un color por defecto
+    
     c = color(#b2db48); 
     
+    // Ciclos con vida
+    ciclos = 1;
+    
     // Obtenemos su valor en la funcion rastrigin
-    fit = rastrigin(x, y);
+    fit = rastrigin(parentX, parentY);
     
     // Verificamos si al nacer la particula es el mejor fit
     if (fit < gbest){
       gbest = fit;
-      gbestx = x;
-      gbesty = y;
+      gbestx = parentX;
+      gbesty = parentY;
     }
     
     // Lo transformamos para que sea visible (coherentemente) en pantalla
-    this.x = cartesianToScreenX(x); 
-    this.y = cartesianToScreenX(y);
+    this.x = cartesianToScreenX(parentX); 
+    this.y = cartesianToScreenY(parentY);
+    this.cartX = x;
+    this.cartY = y;
     
     // Hacemos que se mantengan dentro de la ventana
-    this.x = constrain(this.x, -ancho, ancho); this.y = constrain(this.y, -altura, altura);
+    x = constrain(x, -ancho, ancho); y = constrain(y, -altura, altura);
   }
   
   
@@ -189,6 +200,9 @@ class Individuo{
     // dibuja vector
     fill(c);
     stroke(#ffffff); // Color del borde de la partícula
+    
+    //Cada vez que se despliega significa que paso un ciclo
+    ciclos++;
   }
   // ------------------------------ Función para cambiar color manualmente
   void setColor(color nuevoColor) {
@@ -199,10 +213,10 @@ class Individuo{
   }
   
   float getCartX(){
-    return screenToCartesianX(this.x);
+    return this.cartX;
   }
   float getCartY(){
-    return screenToCartesianY(this.y);
+    return this.cartY;
   }
   
 } // Fin de la definición de la clase Individuo
@@ -237,9 +251,10 @@ void setup() {
    // ~~~~~~~~~~~~~~~~~INDIVIDUOS~~~~~~~~~~~~~~~~~~~~~~~~~
    smooth();
   // crea arreglo de objetos partículas
-  fl = new Individuo[puntos];
+  Individuos = new ArrayList<Individuo>();
+  Seleccionados = new ArrayList<Individuo>();
   for(int i =0;i<puntos;i++)
-    fl[i] = new Individuo();
+    Individuos.add(new Individuo());
 
 
 }
@@ -253,8 +268,8 @@ void draw() {
 
   float cellSize = width / cols;  // Ajusta tamaño de los elementos a la pantalla
   
-  for (int x = 0; x < cols - 1; x++) {
-    for (int y = 0; y < rows - 1; y++) {
+  for (int x = 0; x < cols ; x++) {
+    for (int y = 0; y < rows ; y++) {
       // Usa map para pasar x e y a sus valores equivalentes en la pantalla
       float px = map(x, 0, cols, 0, width);
       float py = map(y, 0, rows, 0, height);
@@ -269,19 +284,40 @@ void draw() {
     
   }
   
-  // ~~~~~~~~~~~~~~ PARTICULAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  for(int i = 0;i<puntos;i++){
-    fl[i].display();
+  // ~~~~~~~~~~~~~~ SELECCION PARTICULAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  deshacerSeleccion();
+  
+  seleccion();
+  
+  cruzamiento();
+  
+  
+  // ~~~~~~~~~~~~~~ DESPLIEGE PARTICULAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  for(int i = 0;i<Individuos.size();i++){
+    Individuos.get(i).display();
+    
+    //Aprovechamos de ver si el individuo cumplio con su expectativa de vida
+    /*if (Individuos.get(i).ciclos == 8){
+      Individuos.remove(i);
+    }*/
   }
   
   despliegaBest();
   
-  // ~~~~~~~~~~~~~~ SELECCION DE PADRES ~~~~~~~~~~~~~~~~
-  for (int i = 0; i < cantTorneos; i++){
-    verSeleccionado(fl);
-  }
+  // ~~~~~~~~~~~~~~ CRUZAMIENTO ~~~~~~~~~~~~~~~~
   
-  delay(1000);
+
+  
+  // Display the size of Individuos at the top left corner
+  fill(255);  // Set text color to white
+  textSize(16);  // Set the text size
+  text("global best: " + gbest, 10, 20);  // Display the size of Individuos
+  text("Num individuos: " + Individuos.size(), 10, 50);  // Display the size of Individuos
+
+  
+  delay(500);
 }
 
 // Mapea valores a un gradiente como mapa de calor
