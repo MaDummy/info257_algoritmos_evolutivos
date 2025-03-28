@@ -7,11 +7,11 @@ int gridSize = 150; // Subdivisiones de la grilla
 float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
 
-float MUTATE_CHANCE = 1000; //1 entre MUTATE_CHANCE
+float MUTATE_CHANCE = 0.000003; // MUTATE_CHANCE*100 % de que ocurra
 
 // Variables usadas para particulas
 int puntos = 160; // Cantidad de particulas
-int expectativa_vida = 8;
+int EXPECT_VIDA = 10;
 Individuo[] fl; // arreglo de partículas
 ArrayList<Individuo> Individuos;
 ArrayList<Individuo> Seleccionados;
@@ -103,7 +103,7 @@ float mutate(float coord){
    int chance;
    char aux='0';
    for(char i:bits){
-     chance = int(random(0,MUTATE_CHANCE));
+     chance = int(random(0,1/MUTATE_CHANCE));
      if(chance == 1){
        if(i=='1'){
          aux = '0';
@@ -135,6 +135,8 @@ void cruzar(Individuo juan, Individuo maria){
   float x_new = mutate(random(min(x1, x2), max(x1, x2)));
 
   Individuo rafael = new Individuo(x_new, y_new);
+  juan.ciclos-=1;
+  maria.ciclos-=1;
   Individuos.add(rafael);
 }
 
@@ -223,11 +225,10 @@ class Individuo{
   
   // ------------------------------ despliega individuo
   void display(){
+    stroke(#ffffff); // Color del borde de la partícula
     ellipse (x,y,d,d);
     // dibuja vector
     fill(c);
-    stroke(#ffffff); // Color del borde de la partícula
-    
     //Cada vez que se despliega significa que paso un ciclo
     ciclos++;
   }
@@ -325,9 +326,9 @@ void draw() {
   for(int i = 0;i<Individuos.size();i++){
     Individuos.get(i).display();
 
-    /*if (Individuos.get(i).ciclos == 8){
+    if (Individuos.get(i).ciclos == EXPECT_VIDA){
       Individuos.remove(i);
-    }*/
+    }
   }
   
   despliegaBest();
