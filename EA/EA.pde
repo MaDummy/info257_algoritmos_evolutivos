@@ -7,7 +7,13 @@ int gridSize = 150; // Subdivisiones de la grilla
 float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
 
-float MUTATE_CHANCE = 0.000003; // MUTATE_CHANCE*100 % de que ocurra
+float MUTATE_CHANCE = 0.0003; // MUTATE_CHANCE*100 % de que ocurra
+
+int MAX_REP=50;
+
+boolean still_evolve=true;
+
+int cant_gen=0;
 
 // Variables usadas para particulas
 int puntos = 160; // Cantidad de particulas
@@ -21,9 +27,13 @@ float gbest = Float.MAX_VALUE; // Fitness del mejor global
 float gbestx, gbesty; // posición del mejor global, en cartesiano
 int evals = 0, evals_to_best = 0; //número de evaluaciones, sólo para despliegue
 
+float auxbest = gbest;
+
+int amount_rep=0;
+
 // Variables usadas para la seleccion de individuos
 int k = 8; // Cantidad de individuos que participaran en el torneo
-int cantTorneos = 20; // Cantidad de torneos a realizar
+int cantTorneos = 40; // Cantidad de torneos a realizar
 
 // ======================= FUNCIONES DE CONVERSIÓN ============================
  
@@ -142,16 +152,11 @@ void cruzar(Individuo juan, Individuo maria){
 
 void cruzamiento(){
   int iteraciones = Seleccionados.size();
-  if (iteraciones % 2 == 0){
-    for(int i = 0; i < iteraciones / 2; i++){
-      cruzar(Seleccionados.get(i), Seleccionados.get(i+1));
-    }
+  for(int i = 0; i < iteraciones / 2; i+=2){
+    cruzar(Seleccionados.get(i), Seleccionados.get(i+1));
   }
-  else{
-    for(int i = 0; i < (iteraciones / 2)-1; i++){
-      cruzar(Seleccionados.get(i), Seleccionados.get(i+1));
-    }
-    cruzar(Seleccionados.get(0), Seleccionados.get(iteraciones));
+  if(iteraciones%2!=0){
+    cruzar(Seleccionados.get(0),Seleccionados.get(iteraciones-1));
   }
 }
 // ========================= PARTICULA ====================================
@@ -230,7 +235,7 @@ class Individuo{
     // dibuja vector
     fill(c);
     //Cada vez que se despliega significa que paso un ciclo
-    ciclos++;
+    if(still_evolve) ciclos++;
   }
   // ------------------------------ Función para cambiar color manualmente
   void setColor(color nuevoColor) {
@@ -314,11 +319,30 @@ void draw() {
   
   // ~~~~~~~~~~~~~~ SELECCION PARTICULAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  deshacerSeleccion();
+  if(amount_rep>=MAX_REP && still_evolve) {
+    println("El algoritmo no a encontrado un punto mejor que el actual con un total de",cant_gen,"generaciones con individuos nuevos");
+    still_evolve = false;
+  }
   
-  seleccion();
+  if(still_evolve){
   
-  cruzamiento();
+    deshacerSeleccion();
+  
+    seleccion();
+  
+    cruzamiento();
+    
+    cant_gen++;
+    
+    if(gbest == auxbest){
+      amount_rep++;
+    }else{
+      amount_rep = 0;
+      auxbest = gbest;
+    }
+    
+  }
+  
   
   
   // ~~~~~~~~~~~~~~ DESPLIEGE PARTICULAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
