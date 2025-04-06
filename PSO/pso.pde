@@ -7,6 +7,11 @@ float maxZ = -Float.MAX_VALUE;
 
 int cant_gen=0;
 
+int MAX_REP = 50;
+int cant_rep = 0;
+boolean still_rep=true;
+
+
 // ======================= FUNCIONES DE CONVERSIÓN ============================
  
 float screenToCartesianX(float sx) {
@@ -29,6 +34,7 @@ int puntos = 100; // Cantidad de particulas se
 Particle[] fl; // arreglo de partículas
 float d = 15; // radio del círculo, solo para despliegue
 float gbest = Float.MAX_VALUE;
+float auxbest = gbest;
 float gbestx, gbesty; // posición y fitness del mejor global
 float w = 1000; // inercia: baja (~50): explotación, alta (~5000): exploración (2000 ok)
 float C1 = 1.5, C2 =  3; // learning factors (C1: own, C2: social) (ok)
@@ -115,7 +121,6 @@ class Particle{
     if (y >= altura || y < 0) { // Rebote en el eje Y (coordenadas de pantalla)
         vy = -vy;  // Rebote en el eje Y
     }
-
 
   }
   
@@ -206,13 +211,30 @@ void draw() {
   for(int i = 0;i<puntos;i++){
     fl[i].display();
   }
+  
+  
   despliegaBest();
   //mueve puntos
-  for(int i = 0;i<puntos;i++){
-    fl[i].move();
-    fl[i].Eval();
+  
+  if(cant_rep >= MAX_REP && still_rep){
+    println("PSO se detuvo debido a estancamiento del mejor valor encontrado en el ciclo",cant_gen,"de las particulas");
+    still_rep = false;
   }
-  cant_gen++;
+  if(still_rep){
+    for(int i = 0;i<puntos;i++){
+      fl[i].move();
+      fl[i].Eval();
+    }
+    cant_gen++;
+    
+    if(auxbest == gbest){
+      cant_rep++;
+    }
+    else if(auxbest != gbest){
+      auxbest = gbest;
+      cant_rep = 0;
+    }
+  }
   
   text("global best: " + gbest, 10, 20);  // 
   text("Evaluaciones: " + cant_gen, 10, 50);  // 
