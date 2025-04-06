@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 int cols, rows;
 float[][] z;
 float domainMin = -3, domainMax = 7;
@@ -11,6 +13,8 @@ int MAX_REP = 500;
 int cant_rep = 0;
 int gen_gbest = 0;
 boolean still_rep=true;
+
+boolean escrito = false;
 
 
 // ======================= FUNCIONES DE CONVERSIÓN ============================
@@ -236,6 +240,22 @@ void draw() {
       cant_rep = 0;
       gen_gbest = cant_gen;
     }
+  }
+  else{
+    if(escrito == false){
+       try{
+         String path = sketchPath("datos.csv");
+         FileWriter myWriter = new FileWriter(path, true);
+         myWriter.write(gbest + "," + cant_gen + "," + gen_gbest + "," +
+         puntos + "," + w + "," + C1 + "," + C2 + "\n");
+         myWriter.close();
+         escrito = true;
+       }
+      catch (IOException e) {
+        System.out.println("An error occurred.");
+        e.printStackTrace();
+      }
+     }
   }
   
   text("global best: " + gbest, 10, 20);  // 

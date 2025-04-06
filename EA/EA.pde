@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 // Variables usadas para la ventana y grafica
 int altura = 700; int ancho = 700; // Dimensiones de la ventana
 int cols, rows;
@@ -6,7 +8,7 @@ float domainMin = -3, domainMax = 7;
 int gridSize = 150; // Subdivisiones de la grilla
 float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
-int delay = 10;
+int delay = 0;
 
 float MUTATE_CHANCE = 0.003; // MUTATE_CHANCE*100 % de que ocurra
 
@@ -36,6 +38,9 @@ int amount_rep=0;
 // Variables usadas para la seleccion de individuos
 int k = 8; // Cantidad de individuos que participaran en el torneo
 int cantTorneos = 40; // Cantidad de torneos a realizar
+
+//Archivos
+boolean escrito = false;
 
 // ======================= FUNCIONES DE CONVERSIÓN ============================
  
@@ -344,7 +349,24 @@ void draw() {
       gen_gbest = cant_gen;
     }
     
-  }
+   }
+   else{
+     if(escrito == false){
+       try{
+         String path = sketchPath("datos.csv");
+         FileWriter myWriter = new FileWriter(path, true);
+         myWriter.write(gbest + "," + cant_gen + "," + gen_gbest + "," +
+         puntos + "," + EXPECT_VIDA + "," + k + "," + cantTorneos + "," + 
+         MUTATE_CHANCE + "\n");
+         myWriter.close();
+         escrito = true;
+       }
+      catch (IOException e) {
+        System.out.println("An error occurred.");
+        e.printStackTrace();
+      }
+     }
+   }
   
   
   
