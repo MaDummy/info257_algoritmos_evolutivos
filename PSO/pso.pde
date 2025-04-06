@@ -7,8 +7,9 @@ float maxZ = -Float.MAX_VALUE;
 
 int cant_gen=0;
 
-int MAX_REP = 50;
+int MAX_REP = 500;
 int cant_rep = 0;
+int gen_gbest = 0;
 boolean still_rep=true;
 
 
@@ -233,6 +234,7 @@ void draw() {
     else if(auxbest != gbest){
       auxbest = gbest;
       cant_rep = 0;
+      gen_gbest = cant_gen;
     }
   }
   
@@ -242,6 +244,7 @@ void draw() {
   text("w: " + w, 200, 20);  // 
   text("C1: " + C1, 200, 50);  // 
   text("C2: " + C2, 200, 80);
+  text("Generaciones para gbest: " + gen_gbest, 200, 110);
 }
 
 // Mapea valores a un gradiente como mapa de calor

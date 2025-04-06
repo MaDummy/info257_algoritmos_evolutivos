@@ -10,11 +10,12 @@ int delay = 10;
 
 float MUTATE_CHANCE = 0.003; // MUTATE_CHANCE*100 % de que ocurra
 
-int MAX_REP=50;
+int MAX_REP=500;
 
 boolean still_evolve=true;
 
 int cant_gen=0;
+int gen_gbest = 0;
 
 // Variables usadas para particulas
 int puntos = 100; // Cantidad de particulas
@@ -340,6 +341,7 @@ void draw() {
     }else{
       amount_rep = 0;
       auxbest = gbest;
+      gen_gbest = cant_gen;
     }
     
   }
@@ -372,6 +374,7 @@ void draw() {
   text("k: " + k, 200, 20);  // 
   text("cant_torneos: " + cantTorneos, 200, 50);  // 
   text("MUTATE_CHANCE: " + MUTATE_CHANCE, 200, 80);
+  text("Generaciones para gbest: " + gen_gbest, 200, 110);
 
   
   delay(delay);
