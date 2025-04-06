@@ -6,8 +6,9 @@ float domainMin = -3, domainMax = 7;
 int gridSize = 150; // Subdivisiones de la grilla
 float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
+int delay = 10;
 
-float MUTATE_CHANCE = 0.0003; // MUTATE_CHANCE*100 % de que ocurra
+float MUTATE_CHANCE = 0.003; // MUTATE_CHANCE*100 % de que ocurra
 
 int MAX_REP=50;
 
@@ -16,7 +17,7 @@ boolean still_evolve=true;
 int cant_gen=0;
 
 // Variables usadas para particulas
-int puntos = 160; // Cantidad de particulas
+int puntos = 100; // Cantidad de particulas
 int EXPECT_VIDA = 10;
 Individuo[] fl; // arreglo de partículas
 ArrayList<Individuo> Individuos;
@@ -364,11 +365,16 @@ void draw() {
   // Display the size of Individuos at the top left corner
   fill(255);  // Set text color to white
   textSize(16);  // Set the text size
-  text("global best: " + gbest, 10, 20);  // Display the size of Individuos
-  text("Num individuos: " + Individuos.size(), 10, 50);  // Display the size of Individuos
+  text("global best: " + gbest, 10, 20);  // 
+  text("Generaciones: " + cant_gen, 10, 50);  // 
+  text("Individuos: " + puntos, 10, 80);
+  text("EXPECT_VIDA: " + EXPECT_VIDA, 10, 110);
+  text("k: " + k, 200, 20);  // 
+  text("cant_torneos: " + cantTorneos, 200, 50);  // 
+  text("MUTATE_CHANCE: " + MUTATE_CHANCE, 200, 80);
 
   
-  delay(500);
+  delay(delay);
 }
 
 // Mapea valores a un gradiente como mapa de calor

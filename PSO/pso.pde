@@ -5,6 +5,8 @@ int gridSize = 150;  // Subdivisiones de la grilla
 float minZ = Float.MAX_VALUE;
 float maxZ = -Float.MAX_VALUE;
 
+int cant_gen=0;
+
 // ======================= FUNCIONES DE CONVERSIÓN ============================
  
 float screenToCartesianX(float sx) {
@@ -210,6 +212,14 @@ void draw() {
     fl[i].move();
     fl[i].Eval();
   }
+  cant_gen++;
+  
+  text("global best: " + gbest, 10, 20);  // 
+  text("Evaluaciones: " + cant_gen, 10, 50);  // 
+  text("Particulas: " + puntos, 10, 80);
+  text("w: " + w, 200, 20);  // 
+  text("C1: " + C1, 200, 50);  // 
+  text("C2: " + C2, 200, 80);
 }
 
 // Mapea valores a un gradiente como mapa de calor
